@@ -1,5 +1,9 @@
 # SVD and HITS Recommender Experiments
 
+
+[![DOI](https://zenodo.org/badge/634012428.svg)](https://zenodo.org/badge/latestdoi/634012428)
+
+
 ## How to Run All Experiments
 1. Install requirements for compiling Python 3.10 (change configure-dep if package manager is not apt)
 
