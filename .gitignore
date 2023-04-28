@@ -1,0 +1,13 @@
+data/*.csv
+data/*.json
+experiments/*/
+configure-dep.completed
+*.zip
+.idea/
+**/*/__pycache__/
+venv_recommender_experiment/
+python-bin/*/
+make-targets/*.completed
+*.patch
+configs/neighbor/
+misc/

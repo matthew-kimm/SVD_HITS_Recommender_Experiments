@@ -1,0 +1,19 @@
+{
+  "name": "Exact Grade Match With Attribute",
+  "resume": true,
+  "data": "data/data.csv",
+  "item_filter": "",
+  "output": "experiments/attribute/",
+  "train": 0.9,
+  "neighbor": {
+    "attributes": ["EC"],
+    "overlap": 1,
+    "round_rating": false
+  },
+  "target_time": 1,
+  "max_recommendations": 10,
+  "metric": {
+    "pass": 2.0
+  },
+  "models": []
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Global Neighborhood",
+  "resume": true,
+  "data": "data/data.csv",
+  "item_filter": "",
+  "output": "experiments/global_analysis/",
+  "train": 0.9,
+  "neighbor": {
+    "attributes": [],
+    "overlap": 0,
+    "round_rating": false,
+    "global": true
+  },
+  "target_time": 1,
+  "max_recommendations": 10,
+  "metric": {
+    "pass": 2.0
+  },
+  "models": []
+}

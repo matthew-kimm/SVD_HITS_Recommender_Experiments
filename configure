@@ -1,0 +1,123 @@
+#!/bin/bash
+
+# Experiment Values
+export RECOMMENDER_EXPERIMENT_REPEATS=1
+export RECOMMENDER_EXPERIMENT_NEIGHBOR_VARIATIONS="0,10,20"
+export RECOMMENDER_EXPERIMENT_PARAMETER_ANALYSIS_MIN_NEIGHBORS=30
+export RECOMMENDER_EXPERIMENT_USE_SLURM=false
+#
+
+if $RECOMMENDER_EXPERIMENT_USE_SLURM;
+then
+  if ! which sbatch;
+  then
+    echo "No sbatch command (slurm not installed) set variable in configure to false"
+    return 1
+  fi
+  export RECOMMENDER_EXPERIMENT_SCRIPTS_DIR="./scripts/slurm"
+else
+  export RECOMMENDER_EXPERIMENT_SCRIPTS_DIR="./scripts/local"
+fi
+
+
+# Set Values
+python_command="python3"
+venv_name="venv_recommender_experiment"
+
+# May work on 3.9 but haven't checked
+python_required_minor_version=10
+
+install_local_python=true
+
+calling_dir=`pwd`
+
+# Install Local Python
+if $install_local_python && ! which wget > /dev/null;
+then
+    echo "error: wget not installed"
+    return 1
+fi
+
+
+if $install_local_python;
+then
+    python_command="./python-bin/python-3.10/Python-3.10.10/python"
+    echo "Installing Python3.10 locally"
+    if [ -d ./python-bin/python-3.10/ ];
+    then
+        echo "Directory ./python-bin/python-3.10/ already exists, skipping ..."
+    else
+        echo "Installing Python 3.10 locally"
+        if ! [ -e configure-dep.completed ];
+        then
+            echo "error: must install python build dependencies first, run script configure-dep"
+            return 1
+        fi
+
+        echo "Downloading Python 3.10"
+        mkdir ./python-bin/python-3.10
+        cd ./python-bin/python-3.10/
+        wget https://www.python.org/ftp/python/3.10.10/Python-3.10.10.tgz
+        echo "wget"
+        file_hash=`md5sum Python-3.10.10.tgz | cut -d " " -f 1`
+        if ! [ "$file_hash" == "6dbe644dd1a520d9853cf6648084c346" ];
+        then
+            echo "error: md5sum does not match"
+            return 1
+        fi
+        gunzip Python-3.10.10.tgz
+        tar xvf Python-3.10.10.tar
+        cd Python-3.10.10
+        ./configure --enable-optimizations --with-lto
+        make || { echo "error: Python3.10 failed to make", exit 1; }
+        echo "Python3.10 has been successfully compiled as ./python-bin/python-3.10/Python-3.10.10/python"
+    fi
+fi
+cd "$calling_dir"
+
+echo "Checking Python Version ..."
+if which $python_command;
+then
+    python_version=`$python_command --version | awk '{print $2}'`
+    echo "Python3 version $python_version is installed."
+    python_major_version=`echo $python_version | cut -d . -f 1`
+    python_minor_version=`echo $python_version | cut -d . -f 2`
+    if [ "$python_major_version" -ne "3" ];
+    then
+        echo "error: $python_command does not call python with version 3."
+        return 1
+    fi
+
+    if [ "$python_minor_version" -lt "$python_required_minor_version" ];
+    then
+        echo "error: $python_command version < 3.$python_required_minor_version"
+        return 1
+    fi
+else
+    echo "error: python3 is not installed."
+    return 1
+fi
+echo -e "Python Version Check Complete\n"
+
+# Create virtual environment
+echo "Checking if virtual environment exists"
+if [ -d "$venv_name" ];
+then
+    echo "Found target virtual environment $venv_name"
+else
+    echo "Creating virtual environment $venv_name ..."
+    $python_command -m venv $venv_name || { echo "error: failed to create venv $venv_name" && exit 1; }
+    echo "Virtual environment $venv_name created successfully."
+fi
+echo -e "Virtual Environment Existence Check Complete\n"
+
+# Install required packages
+python_command="$venv_name/bin/python"
+echo "Installing Required Python Packages from requirements.txt"
+$python_command -m pip install -r requirements.txt || { echo "error: packages failed to install" && exit 1; }
+echo -e "Packages installed successfully\n"
+
+export RECOMMENDER_EXPERIMENT_PYTHON_BIN=$python_command
+
+echo "Configuration Complete"
+return 0

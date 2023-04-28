@@ -1,0 +1,19 @@
+{
+  "name": "Letter Grade Match",
+  "resume": true,
+  "data": "data/data.csv",
+  "item_filter": "",
+  "output": "experiments/letter_grade/",
+  "train": 0.9,
+  "neighbor": {
+    "attributes": [],
+    "overlap": 1,
+    "round_rating": true
+  },
+  "target_time": 1,
+  "max_recommendations": 10,
+  "metric": {
+    "pass": 2.0
+  },
+  "models": []
+}
